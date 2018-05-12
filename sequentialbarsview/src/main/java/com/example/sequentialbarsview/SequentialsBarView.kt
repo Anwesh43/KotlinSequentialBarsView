@@ -28,8 +28,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
 
     data class State(var prevScale : Float = 0f, var dir : Float = 0f, var j : Int = 0) {
 
-        private val scales : Array<Float> = arrayOf(0f, 0f, 0f, 0f, 0f)
-
+        val scales : Array<Float> = arrayOf(0f, 0f, 0f, 0f, 0f)
         fun update(stopcb : (Float) -> Unit) {
             scales[j] += 0.1f * dir
             if (Math.abs(scales[j] - prevScale) > 1) {
@@ -79,4 +78,39 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             }
         }
     }
+
+    data class SequentialsBar (var i : Int, val state : State = State()) {
+
+        fun draw(canvas : Canvas, paint : Paint) {
+            paint.color = Color.parseColor("#448AFF")
+            val w : Float = canvas.width.toFloat()
+            val h : Float = canvas.height.toFloat()
+            val barW : Float = (w/2)/state.scales.size
+            for (i in 0..(state.scales.size-1)) {
+                var x : Float = w/2 * state.scales[i]
+                for(j in i+1..state.scales.size-1) {
+                    x += barW * state.scales[j]
+                }
+                drawSaveRestore(canvas) {
+                    it.translate(x, h/2)
+                    it.drawRect(RectF(-barW/4, -h/6, barW/4, h/6), paint)
+                }
+
+            }
+        }
+
+        fun update(stopcb : (Float) -> Unit) {
+            state.update(stopcb)
+        }
+
+        fun startUpdating(startcb : () -> Unit) {
+            state.startUpdating(startcb)
+        }
+    }
+}
+
+inline fun drawSaveRestore(canvas : Canvas, body : (Canvas) -> Unit) {
+    canvas.save()
+    body(canvas)
+    canvas.restore()
 }
