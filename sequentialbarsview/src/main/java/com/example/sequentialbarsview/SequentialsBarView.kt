@@ -4,6 +4,7 @@ package com.example.sequentialbarsview
  * Created by anweshmishra on 13/05/18.
  */
 
+import android.app.Activity
 import android.graphics.*
 import android.content.*
 import android.view.View
@@ -131,7 +132,14 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
                 animator.start()
             }
         }
+    }
 
+    companion object {
+        fun create(activity : Activity) : SequentialsBarView {
+            val view : SequentialsBarView = SequentialsBarView(activity)
+            activity.setContentView(view)
+            return view
+        }
     }
 }
 
