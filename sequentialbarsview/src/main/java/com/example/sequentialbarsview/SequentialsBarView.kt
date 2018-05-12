@@ -107,6 +107,30 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             state.startUpdating(startcb)
         }
     }
+
+    data class Renderer(var view : View) {
+
+        private val sequentialsBar : SequentialsBar = SequentialsBar(0)
+
+        private val animator : Animator = Animator(view)
+
+        fun render(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(Color.parseColor("#212121"))
+            sequentialsBar.draw(canvas, paint)
+            animator.animate {
+                sequentialsBar.update {
+                    animator.stop()
+                }
+            }
+        }
+
+        fun handleTap() {
+            sequentialsBar.startUpdating {
+                animator.start()
+            }
+        }
+
+    }
 }
 
 inline fun drawSaveRestore(canvas : Canvas, body : (Canvas) -> Unit) {
