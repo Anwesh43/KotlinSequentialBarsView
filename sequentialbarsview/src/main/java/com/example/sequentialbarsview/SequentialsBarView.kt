@@ -35,14 +35,14 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
         fun update(stopcb : (Float) -> Unit) {
             scales[j] += 0.1f * dir
             if (Math.abs(scales[j] - prevScale) > 1) {
-                prevScale = scales[j]
+                scales[j] = prevScale + dir
                 j += dir.toInt()
                 if (j == scales.size || j == -1) {
                     j -= dir.toInt()
-                    dir = 0f
                     prevScale = scales[j]
-                    stopcb(prevScale)
                 }
+                dir = 0f
+                stopcb(scales[j])
             }
         }
 
@@ -90,7 +90,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             val h : Float = canvas.height.toFloat()
             val barW : Float = (w/2)/state.scales.size
             for (i in 0..(state.scales.size-1)) {
-                var x : Float = w/2 * state.scales[i]
+                var x : Float = -barW/2 + (w/2 + barW/2) * state.scales[i]
                 for(j in i+1..state.scales.size-1) {
                     x += barW * state.scales[j]
                 }
