@@ -42,13 +42,14 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             scales[j] += 0.1f * dir
             if (Math.abs(scales[j] - prevScale) > 1) {
                 scales[j] = prevScale + dir
+                stopcb(scales[j], j)
                 j += dir.toInt()
                 if (j == scales.size || j == -1) {
                     j -= dir.toInt()
                     prevScale = scales[j]
                 }
                 dir = 0f
-                stopcb(scales[j], j)
+
             }
         }
 
