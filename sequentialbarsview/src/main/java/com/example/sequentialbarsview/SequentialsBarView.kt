@@ -16,8 +16,14 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
 
     private val renderer : Renderer = Renderer(this)
 
+    var onMoveListener : OnBarMovedListener? = null
+
     override fun onDraw(canvas : Canvas) {
         renderer.render(canvas, paint)
+    }
+
+    fun addOnMoveListener(onMove : (Int) -> Unit) {
+        onMoveListener = OnBarMovedListener(onMove)
     }
 
     override fun onTouchEvent(event : MotionEvent) : Boolean {
@@ -32,7 +38,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
     data class State(var prevScale : Float = 0f, var dir : Float = 0f, var j : Int = 0) {
 
         val scales : Array<Float> = arrayOf(0f, 0f, 0f, 0f, 0f)
-        fun update(stopcb : (Float) -> Unit) {
+        fun update(stopcb : (Float, Int) -> Unit) {
             scales[j] += 0.1f * dir
             if (Math.abs(scales[j] - prevScale) > 1) {
                 scales[j] = prevScale + dir
@@ -42,7 +48,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
                     prevScale = scales[j]
                 }
                 dir = 0f
-                stopcb(scales[j])
+                stopcb(scales[j], j)
             }
         }
 
@@ -102,7 +108,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             }
         }
 
-        fun update(stopcb : (Float) -> Unit) {
+        fun update(stopcb : (Float, Int) -> Unit) {
             state.update(stopcb)
         }
 
@@ -111,7 +117,7 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
         }
     }
 
-    data class Renderer(var view : View) {
+    data class Renderer(var view : SequentialsBarView) {
 
         private val sequentialsBar : SequentialsBar = SequentialsBar(0)
 
@@ -121,8 +127,11 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             canvas.drawColor(Color.parseColor("#212121"))
             sequentialsBar.draw(canvas, paint)
             animator.animate {
-                sequentialsBar.update {
+                sequentialsBar.update {scale, j ->
                     animator.stop()
+                    if (scale == 1f) {
+                        view.onMoveListener?.onMove?.invoke(j)
+                    }
                 }
             }
         }
@@ -141,6 +150,8 @@ class SequentialsBarView (ctx : Context) : View(ctx) {
             return view
         }
     }
+
+    data class OnBarMovedListener(var onMove : (Int) -> Unit)
 }
 
 inline fun drawSaveRestore(canvas : Canvas, body : (Canvas) -> Unit) {
